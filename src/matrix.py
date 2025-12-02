@@ -63,56 +63,70 @@ class Matrix:
                 row.append(self.data[i][j])
             result.append(row)    
         return Matrix(result)
+   
+    def gaussian_elimination(self):
+        if self.rows == 0 or self.cols == 0:
+            return Matrix(self.data), 0
+        matrix = [row[:] for row in self.data]
+        swaps = 0
+        for i in range(min(self.rows, self.cols)):
+            # Поиск опорного элемента
+            pivot_row = i
+            for k in range(i, self.rows):
+                if abs(matrix[k][i]) > 1e-12:
+                    pivot_row = k
+                    break
+            if abs(matrix[pivot_row][i]) < 1e-12:
+                continue  # весь столбец нулевой
+            # Перестановка строк
+            if pivot_row != i:
+                matrix[i], matrix[pivot_row] = matrix[pivot_row], matrix[i]
+                swaps += 1
+        # Зануление элементов ниже
+        for k in range(i + 1, self.rows):
+            factor = matrix[k][i] / matrix[i][i]
+            for j in range(i, self.cols):
+                matrix[k][j] -= factor * matrix[i][j]
+    return Matrix(matrix), swaps
+
     def determinant(self):
         if not self.is_square():
             raise ValueError("Определитель существует только у квадратных матриц")
-        n = self.rows
-        if n == 1:
-            return self.data[0][0]
-        elif n == 2:
-            return self.data[0][0] * self.data[1][1] - self.data[0][1] * self.data[1][0]
-        det = 0
-        for j in range(n):
-            minor_data = []
-            for i in range(1, n):
-                minor_row = []
-                for k in range(n):
-                    if k != j:
-                        minor_row.append(self.data[i][k])
-                minor_data.append(minor_row)
-            minor = Matrix(minor_data)
-            det += (-1) ** j * self.data[0][j] * minor.determinant()
+        echelon, swaps = self.gaussian_elimination()
+        det = 1.0
+        for i in range(self.rows):
+            det *= echelon.data[i][i]
+        if swaps % 2 == 1:  # нечётное число перестановок
+            det = -det
         return det
+    
     def inverse(self):
         if not self.is_square():
             raise ValueError("Обратная матрица не определена для неквадратных")
+        n = self.rows
         det = self.determinant()
         if abs(det) < 1e-10:
-            raise ValueError("Матрица вырожденная, обратной не существует, так как не определена операция деления на определитель, равный нулю")
-        n = self.rows
-        if n == 1:
-            return Matrix([[1 / self.data[0][0]]])
-        # Матрица алгебраических дополнений
-        cofactors = []
+            raise ValueError("Матрица вырожденная, обратной не существует")
+        augmented_data = []
         for i in range(n):
-            cofactor_row = []
-            for j in range(n):
-                # Минор M_ij
-                minor_data = []
-                for x in range(n):
-                    minor_row = []
-                    if x != i:
-                        for y in range(n):
-                            if y != j:
-                                minor_row.append(self.data[x][y])
-                        minor_data.append(minor_row)
-                minor = Matrix(minor_data)
-                # Алгебраическое дополнение A_ij = (-1)^(i+j) * det(M_ij)
-                cofactor = (-1) ** (i + j) * minor.determinant()
-                cofactor_row.append(cofactor)
-            cofactors.append(cofactor_row)
-        # Транспонированная матрица алгебраических дополнений (союзная матрица)
-        adjugate = Matrix(cofactors).transpose()
-        # Обратная матрица = союзная матрица / определитель
-        return adjugate * (1 / det)
+            left_part = self.data[i]
+            right_part = [1.0 if j == i else 0.0 for j in range(n)]
+            augmented_data.append(left_part + right_part)
+        augmented = Matrix(augmented_data)
+        echelon, _ = augmented.gaussian_elimination()
+        # Обратный ход метода Гаусса-Жордана
+        matrix = [row[:] for row in echelon.data]  # глубокая копия!
+        for i in range(n-1, -1, -1):
+            # Нормализация диагонального элемента до 1
+            pivot = matrix[i][i]
+            for j in range(2*n):
+                matrix[i][j] /= pivot
+            # Зануление элементов выше в столбце i
+            for k in range(i-1, -1, -1):
+                factor = matrix[k][i]
+                for j in range(2*n):
+                    matrix[k][j] -= factor * matrix[i][j]
+        # обратную матрицу (правая половина)
+        inverse_data = [matrix[i][n:] for i in range(n)]
+        return Matrix(inverse_data)     
    
