@@ -47,9 +47,9 @@ class Calculator:
             ask_save_result(result.data)
             
         except ValueError as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"❌ Непредвиденная ошибка: {e}")
+            print(f"Непредвиденная ошибка: {e}")
     
     @staticmethod
     def subtract_matrices():
@@ -74,9 +74,9 @@ class Calculator:
             ask_save_result(result.data)
             
         except ValueError as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"❌ Непредвиденная ошибка: {e}")
+            print(f"Непредвиденная ошибка: {e}")
     
     @staticmethod
     def multiply_matrices():
@@ -101,9 +101,9 @@ class Calculator:
             ask_save_result(result.data)
             
         except ValueError as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"❌ Непредвиденная ошибка: {e}")
+            print(f"Непредвиденная ошибка: {e}")
     
     @staticmethod
     def scalar_multiply():
@@ -124,7 +124,7 @@ class Calculator:
             ask_save_result(result.data)
             
         except Exception as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
     
     @staticmethod
     def transpose():
@@ -143,7 +143,7 @@ class Calculator:
             ask_save_result(result.data)
             
         except Exception as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
     
     @staticmethod
     def determinant():
@@ -164,7 +164,7 @@ class Calculator:
             print_matrix(A, "Исходная матрица")
             
             # Предлагаем сохранить
-            save = input("\n💾 Сохранить результат в файл? (y/n): ").lower()
+            save = input("\nСохранить результат в файл? (y/n): ").lower()
             if save == 'y':
                 filename = input("Имя файла: ")
                 with open(filename, 'w') as f:
@@ -175,9 +175,9 @@ class Calculator:
                 print(f"✓ Результат сохранен в '{filename}'")
                 
         except ValueError as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"❌ Непредвиденная ошибка: {e}")
+            print(f"Непредвиденная ошибка: {e}")
     
     @staticmethod
     def inverse():
@@ -196,9 +196,9 @@ class Calculator:
             ask_save_result(result.data)
             
         except ValueError as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"❌ Непредвиденная ошибка: {e}")
+            print(f"Непредвиденная ошибка: {e}")
     
     @staticmethod
     def trace():
@@ -217,7 +217,7 @@ class Calculator:
             
             print_matrix(A, "Исходная матрица")
             
-            save = input("\n💾 Сохранить результат в файл? (y/n): ").lower()
+            save = input("\nСохранить результат в файл? (y/n): ").lower()
             if save == 'y':
                 filename = input("Имя файла: ")
                 with open(filename, 'w') as f:
@@ -225,12 +225,12 @@ class Calculator:
                     for row in A.data:
                         f.write(" ".join(str(x) for x in row) + "\n")
                     f.write(f"\nСлед (trace): {trace_val}\n")
-                print(f"✓ Результат сохранен в '{filename}'")
+                print(f"Результат сохранен в '{filename}'")
                 
         except ValueError as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"❌ Непредвиденная ошибка: {e}")
+            print(f"Непредвиденная ошибка: {e}")
     
     @staticmethod
     def rank():
@@ -249,7 +249,7 @@ class Calculator:
             
             print_matrix(A, "Исходная матрица")
             
-            save = input("\n💾 Сохранить результат в файл? (y/n): ").lower()
+            save = input("\nСохранить результат в файл? (y/n): ").lower()
             if save == 'y':
                 filename = input("Имя файла: ")
                 with open(filename, 'w') as f:
@@ -257,10 +257,10 @@ class Calculator:
                     for row in A.data:
                         f.write(" ".join(str(x) for x in row) + "\n")
                     f.write(f"\nРанг (rank): {rank_val}\n")
-                print(f"✓ Результат сохранен в '{filename}'")
+                print(f"Результат сохранен в '{filename}'")
                 
         except Exception as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
     
     @staticmethod
     def solve_system():
@@ -286,9 +286,9 @@ class Calculator:
                         b.append(val)
                         break
                     except ValueError:
-                        print("❌ Введите число!")
+                        print("Введите число!")
         except Exception as e:
-            print(f"❌ Ошибка ввода вектора: {e}")
+            print(f"Ошибка ввода вектора: {e}")
             return
         
         try:
@@ -320,6 +320,6 @@ class Calculator:
                     print(f"x{i+1} = {val:.6f}")
                     
         except ValueError as e:
-            print(f"❌ Ошибка: {e}")
+            print(f"Ошибка: {e}")
         except Exception as e:
-            print(f"❌ Непредвиденная ошибка: {e}")
+            print(f"Непредвиденная ошибка: {e}")
