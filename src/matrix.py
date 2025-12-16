@@ -258,7 +258,7 @@ class Matrix:
         inverse_data = [matrix[i][n:] for i in range(n)]
         return Matrix(inverse_data)
     def trace(self):
-       """Вычисляет след матрицы.
+        """Вычисляет след матрицы.
         
         Returns:
             float: След матрицы.
