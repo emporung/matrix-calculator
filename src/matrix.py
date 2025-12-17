@@ -162,20 +162,17 @@ class Matrix:
         matrix = [row[:] for row in self.data]
         swaps = 0
         for i in range(min(self.rows, self.cols)):
-            # Поиск опорного элемента
             pivot_row = i
             for k in range(i, self.rows):
                 if abs(matrix[k][i]) > 1e-12:
                     pivot_row = k
                     break
             if abs(matrix[pivot_row][i]) < 1e-12:
-                continue  # весь столбец нулевой
-            # Перестановка строк
+                continue  # fc0
             if pivot_row != i:
                 matrix[i], matrix[pivot_row] = matrix[pivot_row], matrix[i]
-                swaps += 1
+                swaps += 1 
             if normalize:
-                # Нормализуем текущую строку
                 pivot = matrix[i][i]
                 for j in range(i, self.cols):
                     matrix[i][j] /= pivot
@@ -333,11 +330,7 @@ class Matrix:
             else:
                 free_vars.append(col)
         rank = len(basis_vars)
-        
-        # 5. Находим ОДНО частное решение
         x_part = [0.0] * m
-        
-        # Обратный ход для базисных переменных
         for idx in range(rank - 1, -1, -1):
             i = idx  # номер строки
             j = basis_vars[idx]  # номер переменной
@@ -348,32 +341,23 @@ class Matrix:
             for k in range(j + 1, m):
                 x_part[j] -= matrix[i][k] * x_part[k]
         
-        # 6. Если решение единственное или не просили ФСР
         if not free_vars or not return_fsr:
             return x_part
         
-        # 7. Находим Фундаментальную Систему Решений
         fsr = []
+
+        for free_var in free_vars:
+            x = [0.0] * m
+            x[free_var] = 1.0
+       
+            for i in range(rank - 1, -1, -1):
+                basis_var = basis_vars[i]
+                
+                x[basis_var] = 0.0
+                for k in range(basis_var + 1, m):
+                    x[basis_var] -= matrix[i][k] * x[k]
+                x[basis_var] /= matrix[i][basis_var]
         
-        # Для каждой свободной переменной строим вектор ФСР
-        for free_idx, free_var in enumerate(free_vars):
-            # Вектор решения, где free_var = 1, остальные свободные = 0
-            x_fsr = [0.0] * m
-            x_fsr[free_var] = 1.0
-            
-            # Выражаем базисные переменные через свободные
-            for idx in range(rank - 1, -1, -1):
-                i = idx
-                j = basis_vars[idx]
-                
-                # Начинаем с коэффициента при свободной переменной
-                x_fsr[j] = -matrix[i][free_var]
-                
-                # Вычитаем вклады остальных свободных переменных
-                for k in range(j + 1, m):
-                    if k in free_vars and k != free_var:
-                        x_fsr[j] -= matrix[i][k] * x_fsr[k]
-            
-            fsr.append(x_fsr)
+            fsr.append(x)
         
         return x_part, fsr, free_vars
