@@ -289,31 +289,146 @@ class TestMatrix(unittest.TestCase):
         x = m.solve_system([10])
         self.assertAlmostEqual(x[0], 2.0)
     
-    # Тест прямоугольной системы (больше уравнений чем неизвестных)
-    def test_rectangular_solve(self):
-        # Больше уравнений чем неизвестных
+    
+    def test_rectangular_solve_overdetermined(self):
+        """Тест переопределённой системы (больше уравнений чем неизвестных)."""
+        # Система: x + 2y = 5
+        #          3x + 4y = 11
+        #          5x + 6y = 17  (это сумма первых двух)
         A = Matrix([[1, 2], [3, 4], [5, 6]])
         b = [5, 11, 17]
         
+        # Решение должно существовать (система совместна)
         x = A.solve_system(b)
-        # Проверяем что решение приблизительно [1, 2]
-        self.assertAlmostEqual(x[0], 1.0, places=5)
-        self.assertAlmostEqual(x[1], 2.0, places=5)
+        
+        # Проверяем, что это решение
+        self.assertAlmostEqual(x[0], 1.0, places=10)
+        self.assertAlmostEqual(x[1], 2.0, places=10)
+        
+        # Проверяем, что удовлетворяет ВСЕМ уравнениям
+        self.assertAlmostEqual(1*x[0] + 2*x[1], 5.0, places=10)   # 1-е уравнение
+        self.assertAlmostEqual(3*x[0] + 4*x[1], 11.0, places=10)  # 2-е уравнение
+        self.assertAlmostEqual(5*x[0] + 6*x[1], 17.0, places=10)  # 3-е уравнение
     
-    # Тест недоопределённой системы (меньше уравнений чем неизвестных)
+    def test_rectangular_solve_overdetermined_inconsistent(self):
+        """Тест несовместной переопределённой системы."""
+        # Система: x + 2y = 5
+        #          3x + 4y = 11
+        #          5x + 6y = 18  <- несовместно (должно быть 17)
+        A = Matrix([[1, 2], [3, 4], [5, 6]])
+        b = [5, 11, 18]  # Последнее значение изменено!
+        
+        # Должна быть ошибка несовместности
+        with self.assertRaises(ValueError) as context:
+            A.solve_system(b)
+        
+        self.assertIn("несовмест", str(context.exception).lower())
+    
     def test_underdetermined_system(self):
-        # Меньше уравнений чем неизвестных
+        """Тест недоопределённой системы (меньше уравнений чем неизвестных)."""
+        # Система: x + 2y + 3z = 6
         A = Matrix([[1, 2, 3]])
         b = [6]
         
+        # Получаем частное решение и ФСР
         x_part, fsr, free_vars = A.solve_system(b, return_fsr=True)
         
-        # Проверяем что частное решение удовлетворяет
-        self.assertAlmostEqual(x_part[0] + 2*x_part[1] + 3*x_part[2], 6.0)
+        # Проверяем что частное решение удовлетворяет уравнению
+        computed = x_part[0] + 2*x_part[1] + 3*x_part[2]
+        self.assertAlmostEqual(computed, 6.0, places=10,
+                              msg=f"Частное решение {x_part} не удовлетворяет уравнению")
         
-        # Должно быть 2 свободные переменные
-        self.assertEqual(len(free_vars), 2)
+        # Должно быть 2 свободные переменные (3 переменных - ранг 1)
+        self.assertEqual(len(free_vars), 2, 
+                        f"Ожидалось 2 свободные переменные, получили {len(free_vars)}")
+        self.assertEqual(len(fsr), 2,
+                        f"Ожидалось 2 вектора ФСР, получили {len(fsr)}")
+        
+        # Проверяем что векторы ФСР удовлетворяют однородной системе
+        for i, vec in enumerate(fsr):
+            # Проверяем: 1*vec[0] + 2*vec[1] + 3*vec[2] должно быть ~0
+            homogeneous_check = vec[0] + 2*vec[1] + 3*vec[2]
+            self.assertAlmostEqual(homogeneous_check, 0.0, places=10,
+                                  msg=f"Вектор ФСР {i} {vec} не удовлетворяет однородной системе")
+        
+        # Проверяем что общее решение удовлетворяет
+        # x_общее = x_частное + c1*v1 + c2*v2
+        import random
+        for _ in range(5):  # Проверяем 5 случайных комбинаций
+            c1 = random.uniform(-10, 10)
+            c2 = random.uniform(-10, 10)
+            
+            x_general = [
+                x_part[0] + c1*fsr[0][0] + c2*fsr[1][0],
+                x_part[1] + c1*fsr[0][1] + c2*fsr[1][1],
+                x_part[2] + c1*fsr[0][2] + c2*fsr[1][2]
+            ]
+            
+            computed = x_general[0] + 2*x_general[1] + 3*x_general[2]
+            self.assertAlmostEqual(computed, 6.0, places=10,
+                                  msg=f"Общее решение с c1={c1}, c2={c2} не удовлетворяет")
+    
+    def test_underdetermined_system_zero_rhs(self):
+        """Тест недоопределённой однородной системы (b=0)."""
+        # Однородная система: x + 2y + 3z = 0
+        A = Matrix([[1, 2, 3]])
+        b = [0]
+        
+        # Получаем только ФСР (частное решение = 0)
+        x_part, fsr, free_vars = A.solve_system(b, return_fsr=True)
+        
+        # Частное решение должно быть нулевым (или близким к нулю)
+        norm = sum(abs(x) for x in x_part)
+        self.assertLess(norm, 1e-10, 
+                       f"Частное решение должно быть нулевым, получили {x_part}")
+        
+        # Проверяем ФСР
         self.assertEqual(len(fsr), 2)
+        for vec in fsr:
+            check = vec[0] + 2*vec[1] + 3*vec[2]
+            self.assertAlmostEqual(check, 0.0, places=10)
+    
+    def test_square_system_unique_solution(self):
+        """Тест квадратной системы с единственным решением."""
+        A = Matrix([[2, 1], [1, -1]])
+        b = [5, 1]  # Система: 2x + y = 5, x - y = 1
+        
+        x = A.solve_system(b)
+        
+        self.assertAlmostEqual(x[0], 2.0, places=10)
+        self.assertAlmostEqual(x[1], 1.0, places=10)
+        
+        # Проверка подстановкой
+        self.assertAlmostEqual(2*x[0] + x[1], 5.0, places=10)
+        self.assertAlmostEqual(x[0] - x[1], 1.0, places=10)
+    
+    def test_singular_system(self):
+        """Тест вырожденной (сингулярной) системы."""
+        # Система: x + y = 3
+        #          2x + 2y = 6  (та же прямая)
+        A = Matrix([[1, 1], [2, 2]])
+        b = [3, 6]  # Совместна
+        
+        # Должно быть бесконечно много решений
+        x_part, fsr, free_vars = A.solve_system(b, return_fsr=True)
+        
+        self.assertEqual(len(free_vars), 1)  # 2 переменных - ранг 1 = 1 свободная
+        self.assertEqual(len(fsr), 1)
+        
+        # Проверяем частное решение
+        self.assertAlmostEqual(x_part[0] + x_part[1], 3.0, places=10)
+    
+    def test_singular_system_inconsistent(self):
+        """Тест несовместной вырожденной системы."""
+        # Система: x + y = 3
+        #          2x + 2y = 7  (параллельные прямые)
+        A = Matrix([[1, 1], [2, 2]])
+        b = [3, 7]  # Несовместна!
+        
+        with self.assertRaises(ValueError) as context:
+            A.solve_system(b)
+        
+        self.assertIn("несовмест", str(context.exception).lower())
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
