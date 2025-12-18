@@ -235,7 +235,7 @@ class Matrix:
         det = 1.0
         for i in range(self.rows):
             det *= echelon.data[i][i]
-        if swaps % 2 == 1:  # нечётное число перестановок
+        if swaps % 2 == 1:
             det = -det
         return det
     
@@ -267,10 +267,8 @@ class Matrix:
             augmented_data.append(left_part + right_part)
         augmented = Matrix(augmented_data)
         echelon, _ = augmented.gaussian_elimination(normalize=True)
-        # Обратный ход метода Гаусса-Жордана
         matrix = [row[:] for row in echelon.data]
         for i in range(n-1, -1, -1):
-            # Зануление элементов выше в столбце i
             for k in range(i-1, -1, -1):
                 factor = matrix[k][i]
                 for j in range(2*n):
@@ -358,9 +356,7 @@ class Matrix:
         for idx in range(rank - 1, -1, -1):
             i = idx  # номер строки
             j = basis_vars[idx]  # номер переменной
-            
             x_part[j] = matrix[i][m]  # начинаем с правой части
-            
             # Вычитаем вклады базисных переменных справа
             for k in range(j + 1, m):
                 x_part[j] -= matrix[i][k] * x_part[k]
@@ -369,11 +365,9 @@ class Matrix:
             return x_part
         
         fsr = []
-
         for free_var in free_vars:
             x = [0.0] * m
             x[free_var] = 1.0
-       
             for i in range(rank - 1, -1, -1):
                 basis_var = basis_vars[i]
                 
@@ -381,7 +375,6 @@ class Matrix:
                 for k in range(basis_var + 1, m):
                     x[basis_var] -= matrix[i][k] * x[k]
                 x[basis_var] /= matrix[i][basis_var]
-        
             fsr.append(x)
         
         return x_part, fsr, free_vars
