@@ -166,18 +166,17 @@ class Matrix:
         row = col = 0
         
         while row < self.rows and col < self.cols:
-            # Ищем первый ненулевой (по модулю > eps) в столбце col
             pivot_row = None
             for k in range(row, self.rows):
                 if abs(matrix[k][col]) > eps:
                     pivot_row = k
                     break
             
-            if pivot_row is None:  # Весь столбец нулевой
+            if pivot_row is None:
                 col += 1
                 continue
             
-            if pivot_row != row:  # Меняем строки
+            if pivot_row != row:
                 matrix[row], matrix[pivot_row] = matrix[pivot_row], matrix[row]
                 swaps += 1
             
@@ -186,17 +185,15 @@ class Matrix:
                 if abs(pivot) > eps:
                     matrix[row] = [x / pivot for x in matrix[row]]
                 else:
-                    # Если после перестановки pivot всё ещё ~0, пропускаем
                     col += 1
                     continue
             
-            # Обнуляем элементы ниже pivot
             for k in range(row + 1, self.rows):
                 if abs(matrix[k][col]) <= eps:
                     continue
                 
                 if normalize:
-                    factor = matrix[k][col]  # pivot уже = 1
+                    factor = matrix[k][col]
                 else:
                     factor = matrix[k][col] / matrix[row][col]
                 
@@ -354,10 +351,10 @@ class Matrix:
         rank = len(basis_vars)
         x_part = [0.0] * m
         for idx in range(rank - 1, -1, -1):
-            i = idx  # номер строки
-            j = basis_vars[idx]  # номер переменной
-            x_part[j] = matrix[i][m]  # начинаем с правой части
-            # Вычитаем вклады базисных переменных справа
+            i = idx
+            j = basis_vars[idx]
+            x_part[j] = matrix[i][m]
+            
             for k in range(j + 1, m):
                 x_part[j] -= matrix[i][k] * x_part[k]
         
