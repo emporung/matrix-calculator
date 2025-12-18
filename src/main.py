@@ -1,5 +1,4 @@
 def show_menu():
-    """Просто показывает меню"""
     print("\n" + "="*50)
     print(" КАЛЬКУЛЯТОР МАТРИЦ ")
     print("="*50)
@@ -17,7 +16,6 @@ def show_menu():
     print("="*50)
 
 def main():
-    """Главная функция - ТОЛЬКО УПРАВЛЕНИЕ"""
     print("Добро пожаловать в калькулятор матриц!")
     
     from calculator import Calculator
