@@ -52,13 +52,13 @@ def main():
                 print("\nДо свидания!")
                 break
             else:
-                print("❌ Неверный выбор. Введите число от 1 до 11.")
+                print("Неверный выбор. Введите число от 1 до 11.")
                 
         except KeyboardInterrupt:
             print("\n\nВыход из программы.")
             break
         except Exception as e:
-            print(f"\n❌ Ошибка: {e}")
+            print(f"\nОшибка: {e}")
 
 if __name__ == "__main__":
     main()
