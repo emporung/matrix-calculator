@@ -1,7 +1,3 @@
-"""
-КАЛЬКУЛЯТОР МАТРИЦ - связывает ввод, вычисления и вывод
-"""
-
 from io_handler import *
 from matrix import Matrix
 
@@ -21,7 +17,7 @@ class Calculator:
         if data is None:
             return None
         
-        return Matrix(data)  # Создаем объект Matrix
+        return Matrix(data)
     
     @staticmethod
     def add_matrices():
@@ -41,8 +37,7 @@ class Calculator:
             return
         
         try:
-            # ВАЖНО: A и B теперь объекты Matrix!
-            result = A + B  # Используем __add__ из matrix.py
+            result = A + B
             print_matrix(result, "Результат сложения")
             ask_save_result(result.data)
             
@@ -69,7 +64,7 @@ class Calculator:
             return
         
         try:
-            result = A - B  # Используем __sub__ из matrix.py
+            result = A - B
             print_matrix(result, "Результат вычитания")
             ask_save_result(result.data)
             
@@ -96,7 +91,7 @@ class Calculator:
             return
         
         try:
-            result = A * B  # Используем __mul__ из matrix.py
+            result = A * B
             print_matrix(result, "Результат умножения")
             ask_save_result(result.data)
             
@@ -119,7 +114,7 @@ class Calculator:
         scalar = input_scalar()
         
         try:
-            result = A * scalar  # Используем __mul__ из matrix.py
+            result = A * scalar
             print_matrix(result, f"Результат умножения на {scalar}")
             ask_save_result(result.data)
             
@@ -138,7 +133,7 @@ class Calculator:
             return
         
         try:
-            result = A.transpose()  # Используем transpose из matrix.py
+            result = A.transpose()
             print_matrix(result, "Транспонированная матрица")
             ask_save_result(result.data)
             
@@ -157,13 +152,9 @@ class Calculator:
             return
         
         try:
-            det = A.determinant()  # Используем determinant из matrix.py
+            det = A.determinant()
             print(f"\nОпределитель матрицы: {det}")
-            
-            # Показываем матрицу
             print_matrix(A, "Исходная матрица")
-            
-            # Предлагаем сохранить
             save = input("\nСохранить результат в файл? (y/n): ").lower()
             if save == 'y':
                 filename = input("Имя файла: ")
@@ -172,7 +163,7 @@ class Calculator:
                     for row in A.data:
                         f.write(" ".join(str(x) for x in row) + "\n")
                     f.write(f"\nОпределитель: {det}\n")
-                print(f"✓ Результат сохранен в '{filename}'")
+                print(f"Результат сохранен в '{filename}'")
                 
         except ValueError as e:
             print(f"Ошибка: {e}")
@@ -191,7 +182,7 @@ class Calculator:
             return
         
         try:
-            result = A.inverse()  # Используем inverse из matrix.py
+            result = A.inverse()
             print_matrix(result, "Обратная матрица")
             ask_save_result(result.data)
             
@@ -214,9 +205,7 @@ class Calculator:
         try:
             trace_val = A.trace()  # Используем trace из matrix.py
             print(f"\nСлед матрицы: {trace_val}")
-            
             print_matrix(A, "Исходная матрица")
-            
             save = input("\nСохранить результат в файл? (y/n): ").lower()
             if save == 'y':
                 filename = input("Имя файла: ")
@@ -244,7 +233,7 @@ class Calculator:
             return
         
         try:
-            rank_val = A.rank()  # Используем rank из matrix.py
+            rank_val = A.rank()
             print(f"\nРанг матрицы: {rank_val}")
             
             print_matrix(A, "Исходная матрица")
@@ -292,7 +281,7 @@ class Calculator:
             return
         
         try:
-            need_fsr = input("\nНайти ФСР (если решений много)? (y/n): ").lower() == 'y'
+            need_fsr = input("\nНайти ФСР для соотвествующей ОСЛАУ? (y/n): ").lower() == 'y'
             
             if need_fsr:
                 solution = A.solve_system(b, return_fsr=True)
