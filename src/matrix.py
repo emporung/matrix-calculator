@@ -1,4 +1,4 @@
-import math
+
 class Matrix:
     """Класс для работы с матрицами.
     
@@ -52,6 +52,7 @@ class Matrix:
                 row.append(element)
             result.append(row) 
         return Matrix(result)
+    
     def __sub__(self, other):
         """Вычитание двух матриц.
         
@@ -74,6 +75,7 @@ class Matrix:
                 row.append(element)
             result.append(row)
         return Matrix(result)
+    
     def __mul__(self, other):
         """Умножение матрицы на число или другую матрицу.
         
@@ -138,49 +140,72 @@ class Matrix:
                 row.append(self.data[i][j])
             result.append(row)    
         return Matrix(result)
-   
-    def gaussian_elimination(self, normalize=False):
-        """Выполняет метод Гаусса (прямой ход) для приведения к ступенчатому виду.
+    
+    def gaussian_elimination(self, normalize=False, eps=1e-12):
+        """Выполняет метод Гаусса для приведения матрицы к ступенчатому виду.
+    
+        Реализует алгоритм гауссова исключения (прямой ход) для приведения матрицы
+        к ступенчатому виду.
         
         Args:
-            normalize (bool, optional): Если True, делит строки на ведущий элемент
-                для получения единицы на главной диагонали. По умолчанию False.
+            normalize: Если True, выполняет нормализацию строк,
+                приводя ведущие элементы к 1.
+                Если False, оставляет ведущие элементы как есть.
+                По умолчанию False.
+            eps: Пороговое значение для сравнения чисел с нулём.
+                Элементы с абсолютным значением меньше eps считаются нулевыми.
+                По умолчанию 1e-12.
         
         Returns:
-            tuple[Matrix, int]: Кортеж из:
+            Кортеж (Matrix, int), где:
                 - Matrix: Матрица в ступенчатом виде
-                - int: Количество перестановок строк 
-        
-        Example:
-            >>> m = Matrix([[2, 1, -1], [-3, -1, 2], [-2, 1, 2]])
-            >>> echelon, swaps = m.gaussian_elimination()
-            >>> echelon.data
-            [[2, 1, -1], [0.0, 0.5, 0.5], [0.0, 0.0, -1.0]]
+                - int: Количество выполненных перестановок строк
         """
-        if self.rows == 0 or self.cols == 0:
-            return Matrix(self.data), 0
         matrix = [row[:] for row in self.data]
         swaps = 0
-        for i in range(min(self.rows, self.cols)):
-            pivot_row = i
-            for k in range(i, self.rows):
-                if abs(matrix[k][i]) > 1e-12:
+        row = col = 0
+        
+        while row < self.rows and col < self.cols:
+            # Ищем первый ненулевой (по модулю > eps) в столбце col
+            pivot_row = None
+            for k in range(row, self.rows):
+                if abs(matrix[k][col]) > eps:
                     pivot_row = k
                     break
-            if abs(matrix[pivot_row][i]) < 1e-12:
-                continue  # fc0
-            if pivot_row != i:
-                matrix[i], matrix[pivot_row] = matrix[pivot_row], matrix[i]
-                swaps += 1 
+            
+            if pivot_row is None:  # Весь столбец нулевой
+                col += 1
+                continue
+            
+            if pivot_row != row:  # Меняем строки
+                matrix[row], matrix[pivot_row] = matrix[pivot_row], matrix[row]
+                swaps += 1
+            
             if normalize:
-                pivot = matrix[i][i]
-                for j in range(i, self.cols):
-                    matrix[i][j] /= pivot
-            # Зануление элементов ниже
-            for k in range(i + 1, self.rows):
-                factor = matrix[k][i] / (matrix[i][i] if not normalize else 1.0)
-                for j in range(i, self.cols):
-                    matrix[k][j] -= factor * matrix[i][j]
+                pivot = matrix[row][col]
+                if abs(pivot) > eps:
+                    matrix[row] = [x / pivot for x in matrix[row]]
+                else:
+                    # Если после перестановки pivot всё ещё ~0, пропускаем
+                    col += 1
+                    continue
+            
+            # Обнуляем элементы ниже pivot
+            for k in range(row + 1, self.rows):
+                if abs(matrix[k][col]) <= eps:
+                    continue
+                
+                if normalize:
+                    factor = matrix[k][col]  # pivot уже = 1
+                else:
+                    factor = matrix[k][col] / matrix[row][col]
+                
+                for j in range(col, self.cols):
+                    matrix[k][j] -= factor * matrix[row][j]
+            
+            row += 1
+            col += 1
+        
         return Matrix(matrix), swaps
 
     def determinant(self):
@@ -243,17 +268,16 @@ class Matrix:
         augmented = Matrix(augmented_data)
         echelon, _ = augmented.gaussian_elimination(normalize=True)
         # Обратный ход метода Гаусса-Жордана
-        matrix = [row[:] for row in echelon.data]  # глубокая копия!
+        matrix = [row[:] for row in echelon.data]
         for i in range(n-1, -1, -1):
-            
             # Зануление элементов выше в столбце i
             for k in range(i-1, -1, -1):
                 factor = matrix[k][i]
                 for j in range(2*n):
                     matrix[k][j] -= factor * matrix[i][j]
-        # обратную матрицу (правая половина)
         inverse_data = [matrix[i][n:] for i in range(n)]
         return Matrix(inverse_data)
+    
     def trace(self):
         """Вычисляет след матрицы.
         
